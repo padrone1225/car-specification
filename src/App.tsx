@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./App.css";
 import { CarSpecification } from "./components/car";
+import { Dropdown } from "./components/dropdown";
+import { colors, SpecificationList } from "./data";
 
 function App() {
   const [addSpecification, setAddSpecification] = useState(false);
@@ -11,7 +13,9 @@ function App() {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
+    console.log(event);
     for (let i of event.target) {
+      console.log(i);
       if (i.getAttribute("name") === "name") {
         setCarList([...carList, i.value]);
       }
@@ -33,18 +37,19 @@ function App() {
     let list = [];
     for (let i in carSpecifications) {
       list.push(
-        <div className="specification-list" key={i}>
-          <input
-            id={i}
-            type="text"
-            name="item"
-            className="item-name"
-            required
-          />
-          <label className="label-name">
-            <span className="content-name">{i}</span>
-          </label>
-        </div>
+        // <div className="specification-list" key={i}>
+        //   <input
+        //     id={i}
+        //     type="text"
+        //     name="item"
+        //     className="item-name"
+        //     required
+        //   />
+        //   <label className="label-name">
+        //     <span className="content-name">{i}</span>
+        //   </label>
+        // </div>
+        <Dropdown placeHolder={i} options={colors} isSearchable key={i} />
       );
     }
     return list;
@@ -59,17 +64,27 @@ function App() {
     <div className="App">
       <header className="App-header">Car Specification</header>
       <main className="App-main">
-        {addSpecification ? (
+        {!addSpecification ? (
           <>
             <form onSubmit={handleSubmit}>
-              <div className="car-name-input">
+              {/* <div className="car-name-input">
                 <input type="text" name="name" className="car-name" required />
                 <label className="label-name">
                   <span className="content-name">Name of specification</span>
                 </label>
+              </div> */}
+              <div className="list-panel">
+                {SpecificationList.map((list) => (
+                  <Dropdown
+                    placeHolder={list.label}
+                    options={list.value}
+                    isSearchable
+                    key={list.label}
+                  />
+                ))}
+                {viewSpecificantions()}
               </div>
-              {viewSpecificantions()}
-              <div className="air-check">
+              {/* <div className="air-check">
                 <input type="checkbox" id="" />
                 <label>Air suspension</label>
               </div>
@@ -78,7 +93,7 @@ function App() {
                 <label className="label-name">
                   <span className="content-name">Signature on hood</span>
                 </label>
-              </div>
+              </div> */}
               <div className="btn-group">
                 <input
                   type="button"

@@ -30,13 +30,19 @@
 
 form {
   display: grid;
-  gap: 10px;
-  width: 300px;
+  gap: 60px;
+  width: 80%;
+}
+
+.list-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
+  row-gap: 110px;
 }
 
 .car-name-input,
-.hood-input,
-.specification-list {
+.hood-input {
   width: 100%;
   position: relative;
   height: 40px;
@@ -44,8 +50,7 @@ form {
 }
 
 .car-name-input .car-name,
-.hood-input input,
-.specification-list input {
+.hood-input input {
   width: 100%;
   height: 100%;
   color: var(--primary-dark);
@@ -55,8 +60,7 @@ form {
 }
 
 .car-name-input label,
-.hood-input label,
-.specification-list label {
+.hood-input label {
   position: absolute;
   bottom: 0px;
   left: 0px;
@@ -67,8 +71,7 @@ form {
 }
 
 .car-name-input label::after,
-.hood-input label::after,
-.specification-list label::after {
+.hood-input label::after {
   content: "";
   position: absolute;
   bottom: -1px;
@@ -89,17 +92,14 @@ form {
 }
 
 .car-name-input .car-name:focus,
-.hood-input input:focus,
-.specification-list input:focus {
+.hood-input input:focus {
   outline: none;
 }
 
 .car-name-input .car-name:focus + .label-name .content-name,
 .car-name-input .car-name:valid + .label-name .content-name,
 .hood-input input:focus + .label-name .content-name,
-.hood-input input:valid + .label-name .content-name,
-.specification-list input:focus + .label-name .content-name,
-.specification-list input:valid + .label-name .content-name {
+.hood-input input:valid + .label-name .content-name {
   transform: translateY(-100%);
   font-size: 14px;
   left: 0px;
@@ -109,9 +109,7 @@ form {
 .car-name-input .car-name:focus + .label-name::after,
 .car-name-input .car-name:valid + .label-name::after,
 .hood-input input:focus + .label-name::after,
-.hood-input input:valid + .label-name::after,
-.specification-list input:focus + .label-name::after,
-.specification-list input:valid + .label-name::after {
+.hood-input input:valid + .label-name::after {
   transform: translateX(0%);
 }
 
