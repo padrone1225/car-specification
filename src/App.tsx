@@ -1,115 +1,77 @@
-import { useState } from "react";
-import "./App.css";
-import { CarSpecification } from "./components/car";
+import { createContext, useEffect, useState } from "react";
+import { SpecificationForm } from "./components/form";
+import { SpecificationList } from "./components/list";
+import {
+  AllProperties,
+  BasicSpecification,
+  Carlist,
+  CarProperty,
+  OtherProperty,
+  SpecificationData,
+} from "./data";
+import { GlobalCarContext } from "./components/context/carListContext";
+import { GlobalSpecificationContext } from "./components/context/carSpecificationContext";
+import { GlobalBasicPropertyContext } from "./components/context/basicPropertyContext";
+import { GlobalOtherPropertyContext } from "./components/context/otherPropertyContext";
+import { GlobalAllContext } from "./components/context/allPropertiesContext";
+import { GlobalDataContext } from "./components/context/specificationDataContext";
+
+export const SpecificationContext = createContext<Array<any>>([]);
 
 function App() {
-  const [addSpecification, setAddSpecification] = useState(false);
-  const [carList, setCarList] = useState<string[]>([]);
-  const [carSpecifications, setCarSpecifications] = useState({});
-  const [airSuspension, setAirSuspension] = useState(false);
-  const [signatureHood, setSignatureHood] = useState("");
+  const [cars, setCars] = useState<string[]>(Carlist);
+  const [carSpecifications, setCarSpecifications] = useState<Array<any>>([]);
+  const [basicProperties, setBasicProperties] =
+    useState<Array<any>>(CarProperty);
+  const [otherProperties, setOtherProperties] =
+    useState<Array<any>>(OtherProperty);
+  const [allList, setAllList] = useState<Array<any>>(AllProperties);
+  const [dataStructure, setDataStructure] =
+    useState<Array<any>>(SpecificationData);
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    for (let i of event.target) {
-      if (i.getAttribute("name") === "name") {
-        setCarList([...carList, i.value]);
+  useEffect(() => {
+    let specifications = [];
+    for (let i in cars) {
+      let list = [];
+      list.push({ name: cars[i] });
+      for (let j of BasicSpecification) {
+        list.push(j);
       }
-      if (i.getAttribute("name") === "item") {
-        let obName = i.getAttribute("id");
-        setCarSpecifications({ ...carSpecifications, [obName]: i.value });
-      }
-      if (i.getAttribute("type") === "checkbox") {
-        setAirSuspension(i.value);
-      }
-      if (i.getAttribute("name") === "hood") {
-        setSignatureHood(i.value);
-      }
+      specifications.push(list);
     }
-    setAddSpecification(false);
-  };
-
-  const viewSpecificantions = () => {
-    let list = [];
-    for (let i in carSpecifications) {
-      list.push(
-        <div className="specification-list" key={i}>
-          <input
-            id={i}
-            type="text"
-            name="item"
-            className="item-name"
-            required
-          />
-          <label className="label-name">
-            <span className="content-name">{i}</span>
-          </label>
-        </div>
-      );
-    }
-    return list;
-  };
-
-  const addSpecificationItem = () => {
-    let item = prompt("Please enter specification name:");
-    setCarSpecifications({ ...carSpecifications, [item as string]: "" });
-  };
+    setCarSpecifications(specifications);
+  }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">Car Specification</header>
-      <main className="App-main">
-        {addSpecification ? (
-          <>
-            <form onSubmit={handleSubmit}>
-              <div className="car-name-input">
-                <input type="text" name="name" className="car-name" required />
-                <label className="label-name">
-                  <span className="content-name">Name of specification</span>
-                </label>
-              </div>
-              {viewSpecificantions()}
-              <div className="air-check">
-                <input type="checkbox" id="" />
-                <label>Air suspension</label>
-              </div>
-              <div className="hood-input">
-                <input type="text" name="hood" className="hood-name" required />
-                <label className="label-name">
-                  <span className="content-name">Signature on hood</span>
-                </label>
-              </div>
-              <div className="btn-group">
-                <input
-                  type="button"
-                  value="+ new configuration option"
-                  onClick={addSpecificationItem}
-                />
-                <input type="submit" value="Save" />
-              </div>
-            </form>
-          </>
-        ) : (
-          <>
-            {carList.map((car) => (
-              <CarSpecification
-                title={car}
-                items={carSpecifications}
-                air={airSuspension}
-                hood={signatureHood}
-                key={car}
-              />
-            ))}
-            <button
-              className="add-specification"
-              onClick={() => setAddSpecification(true)}
+    <>
+      <div className="bg-primary-dark h-20 w-full text-primary-light text-3xl flex items-center justify-center">
+        Car Specification
+      </div>
+      <div className="bg-primary-light grid grid-cols-2">
+        <GlobalCarContext.Provider value={{ cars, setCars }}>
+          <GlobalSpecificationContext.Provider
+            value={{ carSpecifications, setCarSpecifications }}
+          >
+            <GlobalDataContext.Provider
+              value={{ dataStructure, setDataStructure }}
             >
-              + Make new specification
-            </button>
-          </>
-        )}
-      </main>
-    </div>
+              <SpecificationList />
+              <GlobalBasicPropertyContext.Provider
+                value={{ basicProperties, setBasicProperties }}
+              >
+                <GlobalOtherPropertyContext.Provider
+                  value={{ otherProperties, setOtherProperties }}
+                >
+                  <GlobalAllContext.Provider value={{ allList, setAllList }}>
+                    <SpecificationForm />
+                  </GlobalAllContext.Provider>
+                </GlobalOtherPropertyContext.Provider>
+              </GlobalBasicPropertyContext.Provider>
+            </GlobalDataContext.Provider>
+          </GlobalSpecificationContext.Provider>
+        </GlobalCarContext.Provider>
+      </div>
+    </>
   );
 }
 
