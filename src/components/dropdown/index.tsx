@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import "./index.css";
+import { useEffect, useState } from "react";
+import { useGlobalAllContext } from "../context/allPropertiesContext";
+import { SpecDataType } from "../form";
 
 const Icon = () => {
   return (
@@ -9,117 +10,63 @@ const Icon = () => {
   );
 };
 
-const CloseIcon = () => {
-  return (
-    <svg height="20" width="20" viewBox="0 0 20 20">
-      <path d="M14.348 14.849c-0.469 0.469-1.229 0.469-1.697 0l-2.651-3.030-2.651 3.029c-0.469 0.469-1.229 0.469-1.697 0-0.469-0.469-0.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-0.469-0.469-0.469-1.228 0-1.697s1.228-0.469 1.697 0l2.652 3.031 2.651-3.031c0.469-0.469 1.228-0.469 1.697 0s0.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c0.469 0.469 0.469 1.229 0 1.698z"></path>
-    </svg>
-  );
-};
-
 export const Dropdown = ({
+  style,
   placeHolder,
-  options,
-  isMulti,
-  isSearchable,
+  specifications,
+  setSpecifications,
 }: {
+  style: string;
   placeHolder: string;
-  options: any[];
-  isMulti?: boolean;
-  isSearchable: boolean;
+  specifications: SpecDataType[];
+  setSpecifications: (c: Array<SpecDataType>) => void;
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<any>(isMulti ? [] : null);
-  const [searchValue, setSearchValue] = useState("");
-  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [lists, setLists] = useState<any>([]);
+  const [selectedValue, setSelectedValue] = useState<any>(null);
+
+  const { allList } = useGlobalAllContext();
 
   useEffect(() => {
-    setSearchValue("");
-    if (showMenu && searchRef && searchRef.current) {
-      searchRef.current?.focus();
+    if (showMenu) {
+      setLists(allList.filter((item) => item.type === style));
     }
   }, [showMenu]);
 
-  useEffect(() => {
-    const handler = () => setShowMenu(false);
-    window.addEventListener("click", handler);
-    return () => {
-      window.removeEventListener("click", handler);
-    };
-  });
+  // useEffect(() => {
+  //   const handler = () => setShowMenu(false);
+  //   console.log("h", handler);
+  //   window.addEventListener("click", handler);
+  //   return () => {
+  //     window.removeEventListener("click", handler);
+  //   };
+  // });
 
-  const handleInputClick = (e: any) => {
-    e.stopPropagation();
+  const handleInputclick = (e: any) => {
     setShowMenu(!showMenu);
   };
 
   const getDisplay = () => {
-    if (!selectedValue || selectedValue.length === 0) {
+    if (!selectedValue) {
       return placeHolder;
-    }
-    if (isMulti) {
-      return (
-        <div className="dropdown-tags">
-          {selectedValue.map((option: any) => (
-            <div className="dropdown-tag-item" key={option.value}>
-              {option.label}
-              <span
-                className="dropdown-tag-close"
-                onClick={(e) => onTagRemove(e, option)}
-              >
-                <CloseIcon />
-              </span>
-            </div>
-          ))}
-        </div>
-      );
     }
     return selectedValue.label;
   };
 
-  const removeOption = (option: any) => {
-    return selectedValue.filter((o: any) => o.value !== option.value);
-  };
-
-  const onTagRemove = (e: any, option: any) => {
-    e.stopPropagation();
-    setSelectedValue(removeOption(option));
-  };
-
   const onItemClick = (option: any) => {
-    let newValue;
-    if (isMulti) {
-      if (selectedValue.findIndex((o: any) => o.value === option.value) > 0) {
-        newValue = removeOption(option);
+    setSelectedValue(option);
+    if (specifications) {
+      let index = specifications.findIndex((item) => item.type === option.type);
+      if (index === -1) {
+        setSpecifications([...specifications, option]);
       } else {
-        newValue = [...selectedValue, option];
+        specifications[index] = option;
+        setSpecifications(specifications);
       }
-    } else {
-      newValue = option;
     }
-    setSelectedValue(newValue);
-  };
-
-  const onSearch = (e: any) => {
-    setSearchValue(e.target.value);
-  };
-
-  const getOptions = () => {
-    if (!searchValue) {
-      return options;
-    }
-    return options.filter(
-      (option) =>
-        option.label.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0
-    );
   };
 
   const isSelected = (option: any) => {
-    if (isMulti) {
-      return (
-        selectedValue.filter((o: any) => o.value === option.value).length > 0
-      );
-    }
     if (!selectedValue) {
       return false;
     }
@@ -127,29 +74,31 @@ export const Dropdown = ({
   };
 
   return (
-    <div className="dropdown-container">
-      <div className="dropdown-input" onClick={handleInputClick}>
-        <div className="dropdown-selected-value">{getDisplay()}</div>
-        <div className="dropdown-tools">
-          <div className="dropdown-tool">
-            <Icon />
-          </div>
+    <div
+      id="dropDown"
+      className={`text-left relative border-2 border-primary-dark rounded-md`}
+    >
+      <div
+        id="dropDownInput"
+        className="p-[5px] flex items-center justify-between select-none"
+        onClick={handleInputclick}
+      >
+        <div>{getDisplay()}</div>
+        <div id="dropIcon" className="cursor-pointer">
+          <Icon />
         </div>
       </div>
       {showMenu && (
-        <div className="dropdown-menu">
-          {isSearchable && (
-            <div className="search-box">
-              <input onChange={onSearch} value={searchValue} ref={searchRef} />
-            </div>
-          )}
-          {getOptions().map((option) => (
+        <div className="absolute bg-white max-h-20 w-full border-[1px] border-primary-dark rounded-md overflow-auto translate-y-1">
+          {lists.map((list: any) => (
             <div
-              className={`dropdown-item ${isSelected(option) && "selected"}`}
-              key={option.value}
-              onClick={() => onItemClick(option)}
+              className={`p-[5px] cursor-pointer bg-[#9fc3f870] ${
+                isSelected(list) && "bg-[#0d6efd] text-white"
+              }`}
+              key={list.value}
+              onClick={() => onItemClick(list)}
             >
-              {option.label}
+              {list.label}
             </div>
           ))}
         </div>
